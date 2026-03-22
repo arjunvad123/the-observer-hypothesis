@@ -1,0 +1,818 @@
+{
+  "untrained": {
+    "metadata": {
+      "evaluated_h5_path": "/Users/vedantu/Downloads/the-observer-hypothesis/experiment3_first_thought/data/executor_trajectories.h5",
+      "normalization_h5_path": "/Users/vedantu/Downloads/the-observer-hypothesis/experiment3_first_thought/data/executor_trajectories.h5",
+      "max_samples": 50
+    },
+    "first_thought": {
+      "first_pass_error": 0.02593336995691061,
+      "default_deliberation_error": 0.026021538823843,
+      "first_pass_std": 2.2363674745996982e-07,
+      "default_deliberation_std": 2.2077650640208858e-07,
+      "default_deliberation_passes": 4,
+      "first_better_than_deliberation": true,
+      "deliberation_ratio": 1.003399822972444,
+      "latency_units": {
+        "first_pass": 1,
+        "default_deliberation": 4
+      }
+    },
+    "k_sweep": {
+      "curve": [
+        {
+          "k": 1,
+          "error_mean": 0.02593336995691061,
+          "error_std": 2.2363674745996982e-07,
+          "latency_units": 1,
+          "wall_clock_ms_mean": 210.3402349999942,
+          "wall_clock_ms_std": 5.701724397051139,
+          "final_delta_mean": 0.0,
+          "final_delta_std": 0.0,
+          "mean_path_delta_mean": 0.0,
+          "mean_path_delta_std": 0.0
+        },
+        {
+          "k": 2,
+          "error_mean": 0.026008661799132825,
+          "error_std": 2.214334896260594e-07,
+          "latency_units": 2,
+          "wall_clock_ms_mean": 407.4115925800379,
+          "wall_clock_ms_std": 5.629327367666107,
+          "final_delta_mean": 0.000778955469140783,
+          "final_delta_std": 1.6285831205402822e-07,
+          "mean_path_delta_mean": 0.000778955469140783,
+          "mean_path_delta_std": 1.6285831205402822e-07
+        },
+        {
+          "k": 3,
+          "error_mean": 0.025996316075325012,
+          "error_std": 2.2162999036634564e-07,
+          "latency_units": 3,
+          "wall_clock_ms_mean": 604.6724108800936,
+          "wall_clock_ms_std": 5.947956111157614,
+          "final_delta_mean": 0.0005684822716284544,
+          "final_delta_std": 1.291400178284402e-07,
+          "mean_path_delta_mean": 0.0006737188703846187,
+          "mean_path_delta_std": 1.4595821324505314e-07
+        },
+        {
+          "k": 4,
+          "error_mean": 0.026021538823843,
+          "error_std": 2.2077650640208858e-07,
+          "latency_units": 4,
+          "wall_clock_ms_mean": 801.3156832801088,
+          "wall_clock_ms_std": 7.031750678294243,
+          "final_delta_mean": 0.00045293849194422364,
+          "final_delta_std": 1.125555923356412e-07,
+          "mean_path_delta_mean": 0.000600125410904487,
+          "mean_path_delta_std": 1.347248593219399e-07
+        },
+        {
+          "k": 6,
+          "error_mean": 0.02602393355220556,
+          "error_std": 2.2056311329801107e-07,
+          "latency_units": 6,
+          "wall_clock_ms_mean": 1196.7082307001783,
+          "wall_clock_ms_std": 12.364460947703561,
+          "final_delta_mean": 0.0002444345533149317,
+          "final_delta_std": 6.379433294765213e-08,
+          "mean_path_delta_mean": 0.00047944600717164573,
+          "mean_path_delta_std": 1.1219577374699182e-07
+        },
+        {
+          "k": 8,
+          "error_mean": 0.026024094447493554,
+          "error_std": 2.2056217893694602e-07,
+          "latency_units": 8,
+          "wall_clock_ms_mean": 1588.60902080015,
+          "wall_clock_ms_std": 17.57837999831447,
+          "final_delta_mean": 0.00011771059551392682,
+          "final_delta_std": 3.4638689168656026e-08,
+          "mean_path_delta_mean": 0.0003868271204867467,
+          "mean_path_delta_std": 9.186318221797075e-08
+        }
+      ],
+      "best_k": 1,
+      "is_monotonic_degradation": false,
+      "overthinking_detected": false
+    },
+    "reaction_time": {
+      "curve": [
+        {
+          "latency_units": 1,
+          "error_mean": 0.02593336995691061,
+          "wall_clock_ms_mean": 210.3402349999942
+        },
+        {
+          "latency_units": 2,
+          "error_mean": 0.026008661799132825,
+          "wall_clock_ms_mean": 407.4115925800379
+        },
+        {
+          "latency_units": 3,
+          "error_mean": 0.025996316075325012,
+          "wall_clock_ms_mean": 604.6724108800936
+        },
+        {
+          "latency_units": 4,
+          "error_mean": 0.026021538823843,
+          "wall_clock_ms_mean": 801.3156832801088
+        },
+        {
+          "latency_units": 6,
+          "error_mean": 0.02602393355220556,
+          "wall_clock_ms_mean": 1196.7082307001783
+        },
+        {
+          "latency_units": 8,
+          "error_mean": 0.026024094447493554,
+          "wall_clock_ms_mean": 1588.60902080015
+        }
+      ],
+      "latency_error_slope": 9.720451472435583e-06,
+      "latency_error_corr": 0.7236334911420114,
+      "best_latency_units": 1,
+      "deliberation_hurts": false
+    },
+    "stability": {
+      "curve": [
+        {
+          "k": 1,
+          "final_delta_mean": 0.0,
+          "final_delta_std": 0.0,
+          "mean_path_delta_mean": 0.0,
+          "mean_path_delta_std": 0.0,
+          "error_mean": 0.02593336995691061
+        },
+        {
+          "k": 2,
+          "final_delta_mean": 0.000778955469140783,
+          "final_delta_std": 1.6285831205402822e-07,
+          "mean_path_delta_mean": 0.000778955469140783,
+          "mean_path_delta_std": 1.6285831205402822e-07,
+          "error_mean": 0.026008661799132825
+        },
+        {
+          "k": 3,
+          "final_delta_mean": 0.0005684822716284544,
+          "final_delta_std": 1.291400178284402e-07,
+          "mean_path_delta_mean": 0.0006737188703846187,
+          "mean_path_delta_std": 1.4595821324505314e-07,
+          "error_mean": 0.025996316075325012
+        },
+        {
+          "k": 4,
+          "final_delta_mean": 0.00045293849194422364,
+          "final_delta_std": 1.125555923356412e-07,
+          "mean_path_delta_mean": 0.000600125410904487,
+          "mean_path_delta_std": 1.347248593219399e-07,
+          "error_mean": 0.026021538823843
+        },
+        {
+          "k": 6,
+          "final_delta_mean": 0.0002444345533149317,
+          "final_delta_std": 6.379433294765213e-08,
+          "mean_path_delta_mean": 0.00047944600717164573,
+          "mean_path_delta_std": 1.1219577374699182e-07,
+          "error_mean": 0.02602393355220556
+        },
+        {
+          "k": 8,
+          "final_delta_mean": 0.00011771059551392682,
+          "final_delta_std": 3.4638689168656026e-08,
+          "mean_path_delta_mean": 0.0003868271204867467,
+          "mean_path_delta_std": 9.186318221797075e-08,
+          "error_mean": 0.026024094447493554
+        }
+      ],
+      "stability_accuracy_corr": -0.717237155086512,
+      "delta_error_corr": -0.717237155086512,
+      "most_stable_k": 8
+    },
+    "summary": {
+      "indicators": {
+        "first_thought_advantage": true,
+        "overthinking_detected": false,
+        "latency_tradeoff_detected": true,
+        "stability_tracks_accuracy": false
+      },
+      "positive_count": 2,
+      "total_count": 4,
+      "sample_count": 50,
+      "control_name": "Untrained Observer"
+    }
+  },
+  "linear": {
+    "metadata": {
+      "evaluated_h5_path": "/Users/vedantu/Downloads/the-observer-hypothesis/experiment3_first_thought/data/executor_trajectories.h5",
+      "normalization_h5_path": "/Users/vedantu/Downloads/the-observer-hypothesis/experiment3_first_thought/data/executor_trajectories.h5",
+      "max_samples": 50
+    },
+    "first_thought": {
+      "first_pass_error": 0.00010212292341748253,
+      "default_deliberation_error": 0.0002732316625770181,
+      "first_pass_std": 9.85932572332018e-08,
+      "default_deliberation_std": 1.5894357184737968e-07,
+      "default_deliberation_passes": 4,
+      "first_better_than_deliberation": true,
+      "deliberation_ratio": 2.6755174395080363,
+      "latency_units": {
+        "first_pass": 1,
+        "default_deliberation": 4
+      }
+    },
+    "k_sweep": {
+      "curve": [
+        {
+          "k": 1,
+          "error_mean": 0.00010212292341748253,
+          "error_std": 9.85932572332018e-08,
+          "latency_units": 1,
+          "wall_clock_ms_mean": 0.07729154001026473,
+          "wall_clock_ms_std": 0.25649580746786754,
+          "final_delta_mean": 0.0,
+          "final_delta_std": 0.0,
+          "mean_path_delta_mean": 0.0,
+          "mean_path_delta_std": 0.0
+        },
+        {
+          "k": 2,
+          "error_mean": 0.0001542052216245793,
+          "error_std": 1.1505360968414167e-07,
+          "latency_units": 2,
+          "wall_clock_ms_mean": 0.10777320001579938,
+          "wall_clock_ms_std": 0.26045947662635266,
+          "final_delta_mean": 0.004885951215401292,
+          "final_delta_std": 1.6718798786811192e-06,
+          "mean_path_delta_mean": 0.004885951215401292,
+          "mean_path_delta_std": 1.6718798786811192e-06
+        },
+        {
+          "k": 3,
+          "error_mean": 0.0002154867208446376,
+          "error_std": 1.3465058125461198e-07,
+          "latency_units": 3,
+          "wall_clock_ms_mean": 0.1364123600160383,
+          "wall_clock_ms_std": 0.26191945356307506,
+          "final_delta_mean": 0.003373252903111279,
+          "final_delta_std": 8.506926689032923e-07,
+          "mean_path_delta_mean": 0.004129602059256285,
+          "mean_path_delta_std": 1.2541394403397694e-06
+        },
+        {
+          "k": 4,
+          "error_mean": 0.0002732316625770181,
+          "error_std": 1.5894357184737968e-07,
+          "latency_units": 4,
+          "wall_clock_ms_mean": 0.16479898001307447,
+          "wall_clock_ms_std": 0.2628628013705735,
+          "final_delta_mean": 0.0026350520411506295,
+          "final_delta_std": 1.892296366862837e-07,
+          "mean_path_delta_mean": 0.0036314187198877336,
+          "mean_path_delta_std": 8.960140035672519e-07
+        },
+        {
+          "k": 6,
+          "error_mean": 0.0003984011348802596,
+          "error_std": 1.755533248490068e-07,
+          "latency_units": 6,
+          "wall_clock_ms_mean": 0.22052900000744557,
+          "wall_clock_ms_std": 0.26467894100056605,
+          "final_delta_mean": 0.0020643531577661635,
+          "final_delta_std": 1.0268489466988643e-07,
+          "mean_path_delta_mean": 0.0030601153634488582,
+          "mean_path_delta_std": 6.115675075873264e-07
+        },
+        {
+          "k": 8,
+          "error_mean": 0.0005304073647130281,
+          "error_std": 1.9670413209401064e-07,
+          "latency_units": 8,
+          "wall_clock_ms_mean": 0.2759957599482732,
+          "wall_clock_ms_std": 0.265463738905253,
+          "final_delta_mean": 0.001858401435893029,
+          "final_delta_std": 3.481188988845728e-08,
+          "mean_path_delta_mean": 0.002730712618878377,
+          "mean_path_delta_std": 4.4875364211725416e-07
+        }
+      ],
+      "best_k": 1,
+      "is_monotonic_degradation": true,
+      "overthinking_detected": true
+    },
+    "reaction_time": {
+      "curve": [
+        {
+          "latency_units": 1,
+          "error_mean": 0.00010212292341748253,
+          "wall_clock_ms_mean": 0.07729154001026473
+        },
+        {
+          "latency_units": 2,
+          "error_mean": 0.0001542052216245793,
+          "wall_clock_ms_mean": 0.10777320001579938
+        },
+        {
+          "latency_units": 3,
+          "error_mean": 0.0002154867208446376,
+          "wall_clock_ms_mean": 0.1364123600160383
+        },
+        {
+          "latency_units": 4,
+          "error_mean": 0.0002732316625770181,
+          "wall_clock_ms_mean": 0.16479898001307447
+        },
+        {
+          "latency_units": 6,
+          "error_mean": 0.0003984011348802596,
+          "wall_clock_ms_mean": 0.22052900000744557
+        },
+        {
+          "latency_units": 8,
+          "error_mean": 0.0005304073647130281,
+          "wall_clock_ms_mean": 0.2759957599482732
+        }
+      ],
+      "latency_error_slope": 6.141664100783493e-05,
+      "latency_error_corr": 0.9994522596534159,
+      "best_latency_units": 1,
+      "deliberation_hurts": true
+    },
+    "stability": {
+      "curve": [
+        {
+          "k": 1,
+          "final_delta_mean": 0.0,
+          "final_delta_std": 0.0,
+          "mean_path_delta_mean": 0.0,
+          "mean_path_delta_std": 0.0,
+          "error_mean": 0.00010212292341748253
+        },
+        {
+          "k": 2,
+          "final_delta_mean": 0.004885951215401292,
+          "final_delta_std": 1.6718798786811192e-06,
+          "mean_path_delta_mean": 0.004885951215401292,
+          "mean_path_delta_std": 1.6718798786811192e-06,
+          "error_mean": 0.0001542052216245793
+        },
+        {
+          "k": 3,
+          "final_delta_mean": 0.003373252903111279,
+          "final_delta_std": 8.506926689032923e-07,
+          "mean_path_delta_mean": 0.004129602059256285,
+          "mean_path_delta_std": 1.2541394403397694e-06,
+          "error_mean": 0.0002154867208446376
+        },
+        {
+          "k": 4,
+          "final_delta_mean": 0.0026350520411506295,
+          "final_delta_std": 1.892296366862837e-07,
+          "mean_path_delta_mean": 0.0036314187198877336,
+          "mean_path_delta_std": 8.960140035672519e-07,
+          "error_mean": 0.0002732316625770181
+        },
+        {
+          "k": 6,
+          "final_delta_mean": 0.0020643531577661635,
+          "final_delta_std": 1.0268489466988643e-07,
+          "mean_path_delta_mean": 0.0030601153634488582,
+          "mean_path_delta_std": 6.115675075873264e-07,
+          "error_mean": 0.0003984011348802596
+        },
+        {
+          "k": 8,
+          "final_delta_mean": 0.001858401435893029,
+          "final_delta_std": 3.481188988845728e-08,
+          "mean_path_delta_mean": 0.002730712618878377,
+          "mean_path_delta_std": 4.4875364211725416e-07,
+          "error_mean": 0.0005304073647130281
+        }
+      ],
+      "stability_accuracy_corr": -0.8791986819930886,
+      "delta_error_corr": -0.8791986819930886,
+      "most_stable_k": 8
+    },
+    "summary": {
+      "indicators": {
+        "first_thought_advantage": true,
+        "overthinking_detected": true,
+        "latency_tradeoff_detected": true,
+        "stability_tracks_accuracy": false
+      },
+      "positive_count": 3,
+      "total_count": 4,
+      "sample_count": 50,
+      "control_name": "Linear Baseline"
+    }
+  },
+  "shuffled": {
+    "metadata": {
+      "evaluated_h5_path": "/Users/vedantu/Downloads/the-observer-hypothesis/experiment3_first_thought/data/executor_trajectories.h5",
+      "normalization_h5_path": "/Users/vedantu/Downloads/the-observer-hypothesis/experiment3_first_thought/data/executor_trajectories.h5",
+      "max_samples": 50
+    },
+    "first_thought": {
+      "first_pass_error": 0.00023347458918578922,
+      "default_deliberation_error": 0.0002470767963677645,
+      "first_pass_std": 6.56426465974662e-08,
+      "default_deliberation_std": 6.608610590800632e-08,
+      "default_deliberation_passes": 4,
+      "first_better_than_deliberation": true,
+      "deliberation_ratio": 1.0582599041266594,
+      "latency_units": {
+        "first_pass": 1,
+        "default_deliberation": 4
+      }
+    },
+    "k_sweep": {
+      "curve": [
+        {
+          "k": 1,
+          "error_mean": 0.00023347458918578922,
+          "error_std": 6.56426465974662e-08,
+          "latency_units": 1,
+          "wall_clock_ms_mean": 210.06362667993926,
+          "wall_clock_ms_std": 5.260602235076119,
+          "final_delta_mean": 0.0,
+          "final_delta_std": 0.0,
+          "mean_path_delta_mean": 0.0,
+          "mean_path_delta_std": 0.0
+        },
+        {
+          "k": 2,
+          "error_mean": 0.00023848556651500985,
+          "error_std": 6.552530371531754e-08,
+          "latency_units": 2,
+          "wall_clock_ms_mean": 406.94820841988985,
+          "wall_clock_ms_std": 6.164461425768248,
+          "final_delta_mean": 0.0003014625707874075,
+          "final_delta_std": 1.4754014444934731e-08,
+          "mean_path_delta_mean": 0.0003014625707874075,
+          "mean_path_delta_std": 1.4754014444934731e-08
+        },
+        {
+          "k": 3,
+          "error_mean": 0.00024294803792145102,
+          "error_std": 6.584528905829058e-08,
+          "latency_units": 3,
+          "wall_clock_ms_mean": 605.5688966199068,
+          "wall_clock_ms_std": 6.726735679269797,
+          "final_delta_mean": 0.0002469206985551864,
+          "final_delta_std": 1.1892977540580396e-08,
+          "mean_path_delta_mean": 0.0002741916346712969,
+          "mean_path_delta_std": 8.382881634725644e-09
+        },
+        {
+          "k": 4,
+          "error_mean": 0.0002470767963677645,
+          "error_std": 6.608610590800632e-08,
+          "latency_units": 4,
+          "wall_clock_ms_mean": 803.8102899598925,
+          "wall_clock_ms_std": 8.70320782192735,
+          "final_delta_mean": 0.00022318968025501816,
+          "final_delta_std": 1.1396094158736365e-08,
+          "mean_path_delta_mean": 0.000257190983199204,
+          "mean_path_delta_std": 8.455077602615984e-09
+        },
+        {
+          "k": 6,
+          "error_mean": 0.0002523424127139151,
+          "error_std": 6.643778993830613e-08,
+          "latency_units": 6,
+          "wall_clock_ms_mean": 1200.461723279941,
+          "wall_clock_ms_std": 10.869758344024985,
+          "final_delta_mean": 0.00012414143653586508,
+          "final_delta_std": 8.685592981222309e-09,
+          "mean_path_delta_mean": 0.0002130201859399676,
+          "mean_path_delta_std": 7.169483367706267e-09
+        },
+        {
+          "k": 8,
+          "error_mean": 0.0002547810785472393,
+          "error_std": 6.648451612458553e-08,
+          "latency_units": 8,
+          "wall_clock_ms_mean": 1595.0061224600179,
+          "wall_clock_ms_std": 14.107248748272433,
+          "final_delta_mean": 6.615365695324727e-05,
+          "final_delta_std": 8.121084122914092e-09,
+          "mean_path_delta_mean": 0.00017471951031309017,
+          "mean_path_delta_std": 6.426614549928426e-09
+        }
+      ],
+      "best_k": 1,
+      "is_monotonic_degradation": true,
+      "overthinking_detected": true
+    },
+    "reaction_time": {
+      "curve": [
+        {
+          "latency_units": 1,
+          "error_mean": 0.00023347458918578922,
+          "wall_clock_ms_mean": 210.06362667993926
+        },
+        {
+          "latency_units": 2,
+          "error_mean": 0.00023848556651500985,
+          "wall_clock_ms_mean": 406.94820841988985
+        },
+        {
+          "latency_units": 3,
+          "error_mean": 0.00024294803792145102,
+          "wall_clock_ms_mean": 605.5688966199068
+        },
+        {
+          "latency_units": 4,
+          "error_mean": 0.0002470767963677645,
+          "wall_clock_ms_mean": 803.8102899598925
+        },
+        {
+          "latency_units": 6,
+          "error_mean": 0.0002523424127139151,
+          "wall_clock_ms_mean": 1200.461723279941
+        },
+        {
+          "latency_units": 8,
+          "error_mean": 0.0002547810785472393,
+          "wall_clock_ms_mean": 1595.0061224600179
+        }
+      ],
+      "latency_error_slope": 3.0431235619984832e-06,
+      "latency_error_corr": 0.9720250767715709,
+      "best_latency_units": 1,
+      "deliberation_hurts": true
+    },
+    "stability": {
+      "curve": [
+        {
+          "k": 1,
+          "final_delta_mean": 0.0,
+          "final_delta_std": 0.0,
+          "mean_path_delta_mean": 0.0,
+          "mean_path_delta_std": 0.0,
+          "error_mean": 0.00023347458918578922
+        },
+        {
+          "k": 2,
+          "final_delta_mean": 0.0003014625707874075,
+          "final_delta_std": 1.4754014444934731e-08,
+          "mean_path_delta_mean": 0.0003014625707874075,
+          "mean_path_delta_std": 1.4754014444934731e-08,
+          "error_mean": 0.00023848556651500985
+        },
+        {
+          "k": 3,
+          "final_delta_mean": 0.0002469206985551864,
+          "final_delta_std": 1.1892977540580396e-08,
+          "mean_path_delta_mean": 0.0002741916346712969,
+          "mean_path_delta_std": 8.382881634725644e-09,
+          "error_mean": 0.00024294803792145102
+        },
+        {
+          "k": 4,
+          "final_delta_mean": 0.00022318968025501816,
+          "final_delta_std": 1.1396094158736365e-08,
+          "mean_path_delta_mean": 0.000257190983199204,
+          "mean_path_delta_std": 8.455077602615984e-09,
+          "error_mean": 0.0002470767963677645
+        },
+        {
+          "k": 6,
+          "final_delta_mean": 0.00012414143653586508,
+          "final_delta_std": 8.685592981222309e-09,
+          "mean_path_delta_mean": 0.0002130201859399676,
+          "mean_path_delta_std": 7.169483367706267e-09,
+          "error_mean": 0.0002523424127139151
+        },
+        {
+          "k": 8,
+          "final_delta_mean": 6.615365695324727e-05,
+          "final_delta_std": 8.121084122914092e-09,
+          "mean_path_delta_mean": 0.00017471951031309017,
+          "mean_path_delta_std": 6.426614549928426e-09,
+          "error_mean": 0.0002547810785472393
+        }
+      ],
+      "stability_accuracy_corr": -0.9798258190441901,
+      "delta_error_corr": -0.9798258190441901,
+      "most_stable_k": 8
+    },
+    "summary": {
+      "indicators": {
+        "first_thought_advantage": true,
+        "overthinking_detected": true,
+        "latency_tradeoff_detected": true,
+        "stability_tracks_accuracy": false
+      },
+      "positive_count": 3,
+      "total_count": 4,
+      "sample_count": 50,
+      "control_name": "Shuffled Observer"
+    }
+  },
+  "wrong_executor": {
+    "metadata": {
+      "evaluated_h5_path": "/Users/vedantu/Downloads/the-observer-hypothesis/experiment3_first_thought/data/executor_trajectories_secondary.h5",
+      "normalization_h5_path": "/Users/vedantu/Downloads/the-observer-hypothesis/experiment3_first_thought/data/executor_trajectories.h5",
+      "max_samples": 50
+    },
+    "first_thought": {
+      "first_pass_error": 17.22512763977051,
+      "default_deliberation_error": 21.19510410308838,
+      "first_pass_std": 1.799809583676944e-05,
+      "default_deliberation_std": 1.5286468196697292e-05,
+      "default_deliberation_passes": 4,
+      "first_better_than_deliberation": true,
+      "deliberation_ratio": 1.2304758807215876,
+      "latency_units": {
+        "first_pass": 1,
+        "default_deliberation": 4
+      }
+    },
+    "k_sweep": {
+      "curve": [
+        {
+          "k": 1,
+          "error_mean": 17.22512763977051,
+          "error_std": 1.799809583676944e-05,
+          "latency_units": 1,
+          "wall_clock_ms_mean": 212.56725586001266,
+          "wall_clock_ms_std": 3.810169856339236,
+          "final_delta_mean": 0.0,
+          "final_delta_std": 0.0,
+          "mean_path_delta_mean": 0.0,
+          "mean_path_delta_std": 0.0
+        },
+        {
+          "k": 2,
+          "error_mean": 18.271205978393553,
+          "error_std": 1.748513420542994e-05,
+          "latency_units": 2,
+          "wall_clock_ms_mean": 411.2282325000251,
+          "wall_clock_ms_std": 4.499164924798373,
+          "final_delta_mean": 0.3157406359910965,
+          "final_delta_std": 1.4067864217997046e-06,
+          "mean_path_delta_mean": 0.3157406359910965,
+          "mean_path_delta_std": 1.4067864217997046e-06
+        },
+        {
+          "k": 3,
+          "error_mean": 19.71889907836914,
+          "error_std": 1.718037332906657e-05,
+          "latency_units": 3,
+          "wall_clock_ms_mean": 610.9131625600185,
+          "wall_clock_ms_std": 4.839538295996504,
+          "final_delta_mean": 0.3616010367870331,
+          "final_delta_std": 6.070609441415054e-07,
+          "mean_path_delta_mean": 0.3386708363890648,
+          "mean_path_delta_std": 8.076168180127462e-07
+        },
+        {
+          "k": 4,
+          "error_mean": 21.19510410308838,
+          "error_std": 1.5286468196697292e-05,
+          "latency_units": 4,
+          "wall_clock_ms_mean": 810.69716754002,
+          "wall_clock_ms_std": 6.9330879027424555,
+          "final_delta_mean": 0.3129826271533966,
+          "final_delta_std": 1.0269837052801648e-06,
+          "mean_path_delta_mean": 0.3301080999771754,
+          "mean_path_delta_std": 4.6870416025125026e-07
+        },
+        {
+          "k": 6,
+          "error_mean": 22.9982612991333,
+          "error_std": 1.5340064079605326e-05,
+          "latency_units": 6,
+          "wall_clock_ms_mean": 1211.421163360019,
+          "wall_clock_ms_std": 9.333422450998489,
+          "final_delta_mean": 0.12731594681739808,
+          "final_delta_std": 5.205192100345526e-07,
+          "mean_path_delta_mean": 0.26507261472940447,
+          "mean_path_delta_std": 3.9409390811153925e-07
+        },
+        {
+          "k": 8,
+          "error_mean": 23.79734447479248,
+          "error_std": 1.560770694606943e-05,
+          "latency_units": 8,
+          "wall_clock_ms_mean": 1609.2054575400286,
+          "wall_clock_ms_std": 12.396118681976729,
+          "final_delta_mean": 0.05435877539217472,
+          "final_delta_std": 2.2956810617756568e-07,
+          "mean_path_delta_mean": 0.20880919161651817,
+          "mean_path_delta_std": 3.4516173342660083e-07
+        }
+      ],
+      "best_k": 1,
+      "is_monotonic_degradation": true,
+      "overthinking_detected": true
+    },
+    "reaction_time": {
+      "curve": [
+        {
+          "latency_units": 1,
+          "error_mean": 17.22512763977051,
+          "wall_clock_ms_mean": 212.56725586001266
+        },
+        {
+          "latency_units": 2,
+          "error_mean": 18.271205978393553,
+          "wall_clock_ms_mean": 411.2282325000251
+        },
+        {
+          "latency_units": 3,
+          "error_mean": 19.71889907836914,
+          "wall_clock_ms_mean": 610.9131625600185
+        },
+        {
+          "latency_units": 4,
+          "error_mean": 21.19510410308838,
+          "wall_clock_ms_mean": 810.69716754002
+        },
+        {
+          "latency_units": 6,
+          "error_mean": 22.9982612991333,
+          "wall_clock_ms_mean": 1211.421163360019
+        },
+        {
+          "latency_units": 8,
+          "error_mean": 23.79734447479248,
+          "wall_clock_ms_mean": 1609.2054575400286
+        }
+      ],
+      "latency_error_slope": 0.97791783949908,
+      "latency_error_corr": 0.979470067355112,
+      "best_latency_units": 1,
+      "deliberation_hurts": true
+    },
+    "stability": {
+      "curve": [
+        {
+          "k": 1,
+          "final_delta_mean": 0.0,
+          "final_delta_std": 0.0,
+          "mean_path_delta_mean": 0.0,
+          "mean_path_delta_std": 0.0,
+          "error_mean": 17.22512763977051
+        },
+        {
+          "k": 2,
+          "final_delta_mean": 0.3157406359910965,
+          "final_delta_std": 1.4067864217997046e-06,
+          "mean_path_delta_mean": 0.3157406359910965,
+          "mean_path_delta_std": 1.4067864217997046e-06,
+          "error_mean": 18.271205978393553
+        },
+        {
+          "k": 3,
+          "final_delta_mean": 0.3616010367870331,
+          "final_delta_std": 6.070609441415054e-07,
+          "mean_path_delta_mean": 0.3386708363890648,
+          "mean_path_delta_std": 8.076168180127462e-07,
+          "error_mean": 19.71889907836914
+        },
+        {
+          "k": 4,
+          "final_delta_mean": 0.3129826271533966,
+          "final_delta_std": 1.0269837052801648e-06,
+          "mean_path_delta_mean": 0.3301080999771754,
+          "mean_path_delta_std": 4.6870416025125026e-07,
+          "error_mean": 21.19510410308838
+        },
+        {
+          "k": 6,
+          "final_delta_mean": 0.12731594681739808,
+          "final_delta_std": 5.205192100345526e-07,
+          "mean_path_delta_mean": 0.26507261472940447,
+          "mean_path_delta_std": 3.9409390811153925e-07,
+          "error_mean": 22.9982612991333
+        },
+        {
+          "k": 8,
+          "final_delta_mean": 0.05435877539217472,
+          "final_delta_std": 2.2956810617756568e-07,
+          "mean_path_delta_mean": 0.20880919161651817,
+          "mean_path_delta_std": 3.4516173342660083e-07,
+          "error_mean": 23.79734447479248
+        }
+      ],
+      "stability_accuracy_corr": -0.8842261328100733,
+      "delta_error_corr": -0.8842261328100733,
+      "most_stable_k": 8
+    },
+    "summary": {
+      "indicators": {
+        "first_thought_advantage": true,
+        "overthinking_detected": true,
+        "latency_tradeoff_detected": true,
+        "stability_tracks_accuracy": false
+      },
+      "positive_count": 3,
+      "total_count": 4,
+      "sample_count": 50,
+      "control_name": "Wrong-Executor (Different Seed)"
+    }
+  }
+}

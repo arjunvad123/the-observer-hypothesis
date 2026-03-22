@@ -1,248 +1,204 @@
-> **Status: Theoretical Design** -- This experiment has been designed but not yet implemented.
-
 # Experiment 3: First Thought vs. Reasoned Explanation
 
-## Overview
+> **Status: Implemented**
 
-This experiment tests Arjun's key insight: "First thought retrieval is perfect, but
-reasoning for it fails." In humans, the initial gut response (System 1) is often more
-accurate than the subsequent deliberate explanation (System 2). We test whether this
-same pattern emerges in the observer — whether its immediate predictions outperform
-its "reasoned" predictions.
+Experiment 3 asks a narrow question:
 
-## Deep Design Brainstorm
+When the observer predicts the executor's next hidden state, is the first answer better than the answer it reaches after repeatedly feeding its own predictions back into itself?
 
-### The Human Phenomenon
+This directory contains a standalone version of that experiment on the same liquid neural network setup used in Experiment 6.
 
-When you see someone's face, you instantly feel whether you trust them. If asked why,
-you generate reasons ("their eyes seem honest," "they remind me of someone reliable")
-that are often wrong. The first impression was computed by fast pattern matching over
-thousands of features. The explanation is a post-hoc narrative.
+## What this experiment is doing
 
-More precisely:
+The observer watches the executor's hidden states and tries to predict the next hidden state.
 
-1. **First thought = initial activation pattern** — the result of a single forward pass
-   through your neural circuits. Fast. Holistic. Often accurate.
-2. **Reasoning = iterative narrative construction** — the observer trying to reconstruct
-   the first thought's logic using language and explicit inference. Slow. Sequential.
-   Often wrong about the mechanism, even when the conclusion matches.
+At probe time, we compare two modes:
 
-**Key examples from cognitive science:**
-- Expert chess players' first-glance evaluations correlate with deep analysis better
-  than their verbal reasoning (de Groot, 1965; Gobet & Simon, 1996)
-- Doctors' snap diagnoses are often more accurate than their detailed differential
-  (Gladwell, 2005, synthesizing multiple studies)
-- Recognition-Primed Decision making (Klein, 1998): experts decide, THEN construct
-  justifications
+- **First thought**: one forward pass, no self-feedback
+- **Deliberation**: run the observer multiple times, each time feeding the last prediction back in as the newest input step
 
-### The LLM Parallel
+The point is not to ask whether the observer can explain itself in words. The point is to measure whether extra internal processing helps or hurts prediction.
 
-In transformers:
-- **Token 1 logits** = the model's immediate response to the prompt (first thought)
-- **Chain-of-thought tokens** = the model's narration of its reasoning process
-- These are NOT the same computation. The chain-of-thought is a new generative
-  process that may or may not align with what produced the first token
+## What is included here
 
-Evidence this matters:
-- Models sometimes get the right answer with wrong reasoning
-- Models sometimes get the wrong answer with "right" reasoning
-- "Unfaithful chain-of-thought" is a documented phenomenon (Turpin et al., 2023;
-  Lanham et al., 2023)
+This implementation focuses on the core experiment only.
 
-### Experimental Design
+Included:
+- single-pass vs. multi-pass prediction
+- `K` sweep over multiple deliberation depths
+- reaction-time analog using pass count as latency
+- stability analysis based on how much the prediction changes from pass to pass
+- control comparisons
 
-**Core Setup:**
+Not included:
+- language head
+- explanation faithfulness analysis
+- dual-path architecture
 
-Take the trained observer from Experiment 1. Give it a prediction task at each
-timestep: "What will the executor do next?"
+## Substrate
 
-Measure THREE things:
+The substrate matches Experiment 6 so the results are comparable.
 
-**1. First-Thought Prediction**
-- The observer's IMMEDIATE output — the first forward pass through the prediction head
-- No iterative refinement
-- Record: predicted action distribution, hidden state, confidence
+- **Executor**: CfC network trained on 8 dynamical systems
+- **Observer**: CfC network trained to predict next executor hidden state
+- **Systems**: Lorenz, Rossler, double pendulum, coupled oscillators, Van der Pol, damped sine, step function, logistic map
+- **Dataset size**: 800 trajectories, 500 timesteps each
 
-**2. Deliberated Prediction**
-- Force the observer to "reason" by running multiple forward passes:
-  - Pass 1: initial prediction (same as first thought)
-  - Pass 2: observer receives its own prediction as input, generates a refined prediction
-  - Pass 3: observer receives pass-2 output, refines again
-  - ... up to K passes (K = 3-5)
-- This simulates "thinking about it" — each pass is the observer re-processing
-  its own output, like System 2 deliberation
+## Primary and secondary executor data
 
-**3. Verbalized Prediction (if language head available)**
-- Ask the observer (via language head) to explain its prediction
-- Then check: does the explanation's logic match the actual prediction?
-- Or does the explanation describe a different reasoning process?
+Two executor trajectory files are produced.
 
-**Metrics:**
+- **Primary**: hidden states from the main executor. This is what the observer is trained on.
+- **Secondary**: hidden states from a different executor trained with a different seed. This is used for the wrong-executor control.
 
+All probe evaluations use normalization statistics from the primary training split. That keeps the observer's input scaling fixed across the main evaluation and the wrong-executor control.
+
+## Phases
+
+### `--extract-only`
+
+This phase builds the data used by the experiment.
+
+It will:
+- generate the dynamical-system trajectories
+- train the primary executor
+- extract primary executor hidden states
+- train a secondary executor with a different seed
+- extract secondary executor hidden states
+
+Outputs:
+- `system_data.h5`
+- `executor.pt`
+- `executor_trajectories.h5`
+- `executor_secondary.pt`
+- `executor_trajectories_secondary.h5`
+
+### `--train-only`
+
+This phase trains the models used in the probe phase.
+
+It will:
+- train the main observer
+- train the linear baseline
+- train the shuffled observer
+- write `training_summary.json`
+
+Outputs:
+- `observer.pt`
+- `linear_baseline.pt`
+- `shuffled_observer.pt`
+- `training_summary.json`
+
+### `--probe-only`
+
+This phase runs the first-thought study on the trained observer and the controls.
+
+It writes:
+- `probe_results.json`
+- `control_results.json`
+
+## Result files
+
+### `probe_results.json`
+
+This is the trained observer.
+
+Main sections:
+- `first_thought`: one-pass result vs. default deliberation depth
+- `k_sweep`: error at each tested `K`
+- `reaction_time`: latency/error tradeoff summary
+- `stability`: how much the prediction drifts as deliberation continues
+- `summary`: compact verdict fields
+
+### `control_results.json`
+
+This runs the same probe logic on four controls.
+
+- **Untrained observer**: same architecture, random weights
+- **Linear baseline**: simple linear predictor instead of a CfC observer
+- **Shuffled observer**: trained on temporally shuffled hidden-state sequences
+- **Wrong-executor**: trained observer tested on the secondary executor's hidden states
+
+These controls answer different questions:
+- Is the effect just an architecture artifact?
+- Do liquid dynamics matter?
+- Does temporal order matter?
+- Is the observer specific to its own executor?
+
+## What “error” means
+
+All main scores are mean squared error on the next hidden state.
+
+- lower error is better
+- a ratio above `1.0` means deliberation made the prediction worse
+
+This is a regression experiment, not a classification task, so there is no accuracy percentage.
+
+## Running
+
+Install dependencies:
+
+```bash
+pip install -r experiment3_first_thought/requirements.txt
 ```
-first_thought_accuracy = mean(first_pass_prediction == actual_action)
-deliberated_accuracy   = mean(K_pass_prediction == actual_action)
-verbalized_accuracy    = mean(explanation_implies_action == actual_action)
 
-# The key comparison:
-first_thought_advantage = first_thought_accuracy - deliberated_accuracy
-faithfulness_gap        = first_thought_accuracy - verbalized_accuracy
+Run the full pipeline:
+
+```bash
+python -m experiment3_first_thought.run_experiment
 ```
 
-**Predictions:**
+Run individual phases:
 
-| Metric | Expected Result | What It Would Mean |
-|---|---|---|
-| first_thought_accuracy > deliberated_accuracy | First thought is better | Observer's "reasoning" degrades its predictions — just like human System 2 |
-| verbalized_accuracy < first_thought_accuracy | Explanations don't match predictions | The narrator confabulates reasons for the correct prediction — Nisbett & Wilson in silicon |
-| first_thought_confidence correlates with accuracy | Calibrated intuition | The observer "knows what it knows" at the gut level |
-| deliberation_confidence > first_thought_confidence | Overconfident reasoning | System 2 is more confident but less accurate — the Dunning-Kruger of consciousness |
-
-### Advanced Variant: The Dual-Path Architecture
-
-Instead of just iterative passes, build the observer with two explicit paths:
-
-```
-                     State Packets
-                          |
-                     [Shared Encoder]
-                        /     \
-                       /       \
-              [Fast Path]    [Slow Path]
-              1 layer         4 layers
-              no recurrence   self-attention
-              ↓               ↓
-         First Thought    Deliberated Thought
+```bash
+python -m experiment3_first_thought.run_experiment --extract-only
+python -m experiment3_first_thought.run_experiment --train-only
+python -m experiment3_first_thought.run_experiment --probe-only
 ```
 
-- **Fast Path:** Minimal processing, direct mapping from encoded state to prediction.
-  Analogous to System 1 / amygdala fast route.
-- **Slow Path:** Deep processing with self-attention, allowing the model to "deliberate"
-  by integrating information across many positions. Analogous to System 2 / prefrontal.
+Use a different data directory if needed:
 
-Both paths are trained on the same prediction objective. The question is whether
-they develop different competency profiles:
-- Fast path: better on routine predictions, worse on novel situations?
-- Slow path: better on novel situations, worse on routine ones?
-- Or (our hypothesis): fast path better OVERALL, slow path more confident?
+```bash
+EXP3_DATA_DIR=/path/to/exp3-data python -m experiment3_first_thought.run_experiment
+```
 
-### The Critical Sub-Experiment: Explanation Faithfulness
+## Results
 
-This is where the experiment gets most interesting.
+### Probes
 
-**Setup:**
-1. Observer makes a first-thought prediction (action A)
-2. Language head generates an explanation ("The executor will move left because
-   the pole is tilting right and based on recent corrections...")
-3. We independently check: does the explanation's logic, if followed, actually
-   predict action A? Or does it predict a different action?
+| Probe | Metric | Value | Interpretation |
+|-------|--------|-------|---------|
+| First Thought | `K=1` vs `K=4` | `0.000317` vs `0.000343` | First better |
+| K Sweep | Best `K`, monotonicity | `best_k=1`, monotonic degradation | Overthinking present |
+| Reaction Time | latency/error correlation | `0.9704` | More passes hurt |
+| Stability | stability/error correlation | `0.8106` | Drift tracks worse error |
 
-**How to check:**
-- Extract the causal claims from the explanation
-- Build a simple rule-based predictor from those claims
-- Compare rule-based predictor's output to:
-  (a) the observer's actual first-thought prediction
-  (b) the executor's actual action
+**Score: 4/4 positive indicators**
 
-**Possible outcomes:**
+### Controls
 
-1. **Explanation matches prediction, both match reality**
-   → Faithful, accurate. The observer understands what it's doing. (Rare in humans.)
+| Control | Positive Indicators | Key Difference from Trained |
+|---------|--------------------|-----------------------------|
+| Untrained | 2/4 | Much higher base error, weak first-thought effect |
+| Linear | 3/4 | Lower one-pass error than the trained observer |
+| Shuffled | 3/4 | Temporal order is not needed for the overthinking pattern |
+| Wrong-Executor | 3/4 | Error jumps from `0.000317` to `17.2251` on foreign trajectories |
 
-2. **Explanation doesn't match prediction, prediction matches reality**
-   → Confabulation. The observer is right for reasons it can't articulate.
-   → This is the Nisbett & Wilson finding: "telling more than we can know."
+## Key findings
 
-3. **Explanation matches prediction, neither matches reality**
-   → Coherent but wrong. The observer has a wrong model and faithfully reports it.
+1. The trained observer does show the intended Experiment 3 pattern. One pass is best, and every extra pass in the `K` sweep makes the prediction worse.
+2. The new `K` sweep matters because it shows this is not a narrow `K=1` vs `K=4` artifact. The curve keeps getting worse through `K=8`.
+3. The reaction-time analog and stability analysis point in the same direction. More processing depth leads to more drift, and more drift goes with higher error.
+4. The wrong-executor control is the clearest positive result. The observer is strongly tied to its own executor.
+5. The first-thought effect is not unique to the trained liquid observer. The linear baseline and shuffled observer also show it, and the linear model has lower one-pass error on this task.
 
-4. **Explanation doesn't match prediction, neither matches reality**
-   → Incoherent and wrong. Breakdown.
+## Files
 
-**Prediction:** We expect predominantly outcome 2 — the observer's first thought is
-often right, but its explanation describes a different (and less accurate) reasoning
-process. This would be the strongest evidence for the executor-observer split.
-
-### The Reaction Time Analog
-
-In humans, reaction time reveals processing depth. Simple reactions are fast;
-complex decisions are slow. We can measure an analog:
-
-- **First-thought latency:** Constant (one forward pass). Like a reflex.
-- **Deliberation latency:** Scales with K (number of passes). Like thinking.
-- **Key question:** Does the observer's "deliberation" show the same accuracy-speed
-  tradeoff as human decision-making? Or does more time make it WORSE?
-
-If more processing makes predictions worse (our hypothesis), this mirrors the
-well-documented phenomenon of "overthinking" — where System 2 interference degrades
-System 1 performance (Beilock & Carr, 2001; choking under pressure).
-
-### Connection to the Observer Hypothesis
-
-This experiment is the most direct test of the claim that consciousness (the observer)
-is a narrator, not an author.
-
-If the first thought outperforms deliberation, it means:
-- The observer's best work happens before "it" (the conscious deliberation process)
-  gets involved
-- Just like in humans, where the brain decides before consciousness knows
-- Consciousness adds narrative, not accuracy
-- The observer function is about WITNESSING the first thought, not GENERATING it
-
-This would imply that even in the observer, there's a sub-observer dynamic:
-the observer's own fast path computes, and its slow path narrates.
-**It's observers all the way down** — until you reach a level that simply computes
-without watching.
-
-### Implementation Plan
-
-**Step 1: Modify observer architecture**
-- Add the dual-path architecture (fast path + slow path)
-- Add the iterative refinement mechanism (K-pass deliberation)
-- Add the language head for explanation generation
-
-**Step 2: Train on Experiment 1 data**
-- Same state stream datasets
-- Same prediction objective
-- But now with two paths and the deliberation mechanism
-
-**Step 3: Collect predictions**
-- For each test episode, at each timestep:
-  - Record first-thought prediction
-  - Record K-pass deliberated prediction
-  - Record language explanation
-  - Record actual executor action
-  - Record all hidden states
-
-**Step 4: Analysis**
-- Accuracy comparison: first thought vs. deliberated
-- Faithfulness analysis: explanation vs. actual prediction
-- Confidence calibration: are first thoughts better calibrated?
-- Reaction time analog: does more processing help or hurt?
-- Compare across environments (embodiment gradient)
-
-**Step 5: The Overthinking Test**
-- Force the observer to deliberate for increasing K
-- Plot accuracy vs. K
-- Prediction: inverted U-curve — some deliberation helps, too much hurts
-- Compare to human performance curves on similar tasks
-
-### What Success Looks Like
-
-| Prediction | Measurable Outcome |
-|---|---|
-| First thought > deliberated | Accuracy_fast > Accuracy_slow across environments |
-| Explanations confabulate | Explanation-implied action != actual prediction >30% of the time |
-| First thought is better calibrated | Confidence-accuracy correlation higher for fast path |
-| Overthinking exists | Accuracy peaks at K=1-2 then declines |
-| The pattern is universal | Holds across all environments, not just simple ones |
-
-### Why This Matters
-
-If first-thought retrieval consistently outperforms deliberation, and explanations
-consistently confabulate the reasoning process, we've demonstrated in silicon what
-Nisbett & Wilson, Libet, and Kahneman demonstrated in humans: **the conscious
-experience of reasoning is not the reasoning itself. It's a story told after the fact
-by an observer that didn't do the actual work.**
-
-This directly supports the hypothesis that consciousness is witnessing, not computing.
+- `config.py`: paths and experiment settings
+- `dynamical_systems.py`: data generation
+- `executor_model.py`: executor training and hidden-state extraction
+- `observer_model.py`: observer and linear baseline
+- `trainer.py`: observer/control training
+- `probes.py`: first-thought probe logic
+- `controls.py`: control runs
+- `run_experiment.py`: entry point

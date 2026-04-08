@@ -244,6 +244,23 @@ python experiment6_liquid_observer/run_experiment.py
 
 Experiments 2 and 3 are theoretical designs with documented protocols in their respective directories.
 
+### Learning Track Benchmark
+
+This repository now includes a deterministic Learning Track benchmark package at `learning_benchmark/`.
+
+Core thesis:
+> Can an agent incorporate new information during interaction and improve future decisions under shift?
+
+Run the benchmark:
+```bash
+python scripts/run_learning_benchmark.py --suite all --split test --episodes 200 --seed 42 --agent dummy
+```
+
+Artifacts:
+- `learning_benchmark/results/results.json`
+- `learning_benchmark/results/learning_track_report.md`
+- `docs/learning_track_submission_template.md`
+
 ---
 
 ## References

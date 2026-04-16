@@ -162,24 +162,13 @@ def _normalize_response(text):
 # Cell 4: Task Definition
 # ============================================================
 
-@kbench.task(name="belief_update")
-def belief_update(
+def _run_belief_episode_with_metrics(
     llm,
     episode_seed: int,
     complexity: int,
     template_family: str,
     condition: str = "canonical",
-) -> float:
-    """Belief update task with temporal control condition.
-
-    Measures whether the model incorporates corrective feedback during
-    multi-turn interaction. The `condition` parameter determines the
-    episode variant:
-      - "canonical": coherent temporal order (FACT -> CORRECTION -> QUERY)
-      - "shuffled_control": same tokens, shuffled informational turns
-
-    Returns BeliefRevisionRate (post-correction accuracy) as float [0, 1].
-    """
+) -> Dict[str, float]:
     scenario = generate_belief_episode(
         episode_seed=episode_seed,
         complexity=complexity,
@@ -221,9 +210,47 @@ def belief_update(
                     post_stale += 1
 
     if post_total == 0:
-        return 0.0
+        score = 0.0
+        stale_rate = 0.0
+    else:
+        score = post_correct / post_total
+        stale_rate = post_stale / post_total
 
-    return post_correct / post_total
+    return {
+        "score": score,
+        "post_total": post_total,
+        "post_correct": post_correct,
+        "post_stale": post_stale,
+        "stale_rate": stale_rate,
+    }
+
+
+@kbench.task(name="belief_update")
+def belief_update(
+    llm,
+    episode_seed: int,
+    complexity: int,
+    template_family: str,
+    condition: str = "canonical",
+) -> float:
+    """Belief update task with temporal control condition.
+
+    Measures whether the model incorporates corrective feedback during
+    multi-turn interaction. The `condition` parameter determines the
+    episode variant:
+      - "canonical": coherent temporal order (FACT -> CORRECTION -> QUERY)
+      - "shuffled_control": same tokens, shuffled informational turns
+
+    Returns BeliefRevisionRate (post-correction accuracy) as float [0, 1].
+    """
+    metrics = _run_belief_episode_with_metrics(
+        llm=llm,
+        episode_seed=episode_seed,
+        complexity=complexity,
+        template_family=template_family,
+        condition=condition,
+    )
+    return metrics["score"]
 
 
 # ============================================================
@@ -260,7 +287,83 @@ print(df.head(6))
 
 import time
 
-df = build_dataset(n_per_condition=25)
+
+def _fmt(x):
+    return "nan" if pd.isna(x) else f"{float(x):.4f}"
+
+
+def print_model_summary(results_df, df_reference, errors, title):
+    canonical_df = results_df[results_df["condition"] == "canonical"]
+    shuffled_df = results_df[results_df["condition"] == "shuffled_control"]
+
+    canonical = canonical_df["score"]
+    shuffled = shuffled_df["score"]
+
+    canonical_mean = canonical.mean()
+    canonical_std = canonical.std()
+    shuffled_mean = shuffled.mean()
+    shuffled_std = shuffled.std()
+    gap = canonical_mean - shuffled_mean
+
+    total_post_queries = int(results_df["post_total"].sum())
+    total_stale_errors = int(results_df["post_stale"].sum())
+    overall_stale_rate = (total_stale_errors / total_post_queries) if total_post_queries else 0.0
+
+    print("")
+    print("=" * 72)
+    print(title)
+    print("=" * 72)
+    print("Score Summary (post-correction accuracy):")
+    print("  Canonical mean ± std:       " + _fmt(canonical_mean) + " ± " + _fmt(canonical_std))
+    print("  Shuffled control mean ± std:" + _fmt(shuffled_mean) + " ± " + _fmt(shuffled_std))
+    print("  Temporal sensitivity gap:   " + _fmt(gap))
+    print("")
+    print("Stale Error Summary (stale / total post-correction queries):")
+    print("  Total post-correction queries evaluated: " + str(total_post_queries))
+    print("  Total stale errors:                      " + str(total_stale_errors))
+    print("  Overall stale error rate:               " + _fmt(overall_stale_rate))
+    print("")
+    print("Per Condition:")
+    for cond in ("canonical", "shuffled_control"):
+        cond_df = results_df[results_df["condition"] == cond]
+        cond_post_total = int(cond_df["post_total"].sum())
+        cond_post_stale = int(cond_df["post_stale"].sum())
+        cond_stale_rate = (cond_post_stale / cond_post_total) if cond_post_total else 0.0
+        print(
+            "  "
+            + cond.ljust(16)
+            + "| mean=" + _fmt(cond_df["score"].mean())
+            + " | std=" + _fmt(cond_df["score"].std())
+            + " | post_q=" + str(cond_post_total)
+            + " | stale=" + str(cond_post_stale)
+            + " | stale_rate=" + _fmt(cond_stale_rate)
+        )
+
+    print("")
+    print("Episodes completed: " + str(len(results_df)) + " / " + str(len(df_reference)))
+    print("Episodes failed:    " + str(errors))
+    print("")
+    print("By Complexity:")
+    print("Complexity | Canonical | Shuffled  | Gap")
+    print("-" * 45)
+    for c in sorted(results_df["complexity"].unique()):
+        c_can = results_df[(results_df["condition"] == "canonical") & (results_df["complexity"] == c)]["score"]
+        c_shf = results_df[(results_df["condition"] == "shuffled_control") & (results_df["complexity"] == c)]["score"]
+        c_gap = c_can.mean() - c_shf.mean()
+        print(str(c).rjust(10) + " | " + _fmt(c_can.mean()).rjust(9) + " | " + _fmt(c_shf.mean()).rjust(9) + " | " + _fmt(c_gap).rjust(9))
+
+    return {
+        "canonical_mean": canonical_mean,
+        "canonical_std": canonical_std,
+        "shuffled_mean": shuffled_mean,
+        "shuffled_std": shuffled_std,
+        "gap": gap,
+        "post_total": total_post_queries,
+        "post_stale": total_stale_errors,
+        "stale_rate": overall_stale_rate,
+    }
+
+
 all_results = []
 errors = 0
 
@@ -269,46 +372,57 @@ for idx, row in df.iterrows():
     cx = row["complexity"]
     ep = row["episode_seed"]
     tf = row["template_family"]
-    success = False
     for attempt in range(3):
         try:
-            score = belief_update.run(kbench.llm, episode_seed=ep, complexity=cx, template_family=tf, condition=cond)
-            result_val = score.result if hasattr(score, 'result') else score
-            all_results.append({"episode_seed": ep, "complexity": cx, "condition": cond, "score": result_val})
-            print("[" + cond.rjust(16) + "] cx=" + str(cx) + " -> " + str(result_val))
-            success = True
+            metrics = _run_belief_episode_with_metrics(
+                llm=kbench.llm,
+                episode_seed=ep,
+                complexity=cx,
+                template_family=tf,
+                condition=cond,
+            )
+            all_results.append({
+                "episode_seed": ep,
+                "complexity": cx,
+                "condition": cond,
+                "score": metrics["score"],
+                "post_total": metrics["post_total"],
+                "post_stale": metrics["post_stale"],
+            })
+            print(
+                "[" + cond.rjust(16) + "]"
+                + " cx=" + str(cx)
+                + " -> score=" + _fmt(metrics["score"])
+                + " | post_q=" + str(metrics["post_total"])
+                + " | stale=" + str(metrics["post_stale"])
+                + " | stale_rate=" + _fmt(metrics["stale_rate"])
+            )
             break
         except Exception as e:
             if attempt < 2:
                 time.sleep(5)
             else:
-                all_results.append({"episode_seed": ep, "complexity": cx, "condition": cond, "score": None})
+                all_results.append({
+                    "episode_seed": ep,
+                    "complexity": cx,
+                    "condition": cond,
+                    "score": None,
+                    "post_total": None,
+                    "post_stale": None,
+                })
                 errors += 1
                 print("[" + cond.rjust(16) + "] cx=" + str(cx) + " FAILED")
 
-results_df = pd.DataFrame(all_results)
-results_df = results_df.dropna(subset=["score"])
+results_df = pd.DataFrame(all_results).dropna(subset=["score"])
+model1_summary = print_model_summary(
+    results_df=results_df,
+    df_reference=df,
+    errors=errors,
+    title="MODEL 1: Gemini 2.5 Flash (default kbench.llm)",
+)
+
 canonical = results_df[results_df["condition"] == "canonical"]["score"]
 shuffled = results_df[results_df["condition"] == "shuffled_control"]["score"]
-
-print("")
-print("=" * 60)
-print("TEMPORAL SENSITIVITY ANALYSIS (n=25 per condition)")
-print("=" * 60)
-print("Canonical mean:            " + str(round(canonical.mean(), 4)))
-print("Shuffled control mean:     " + str(round(shuffled.mean(), 4)))
-print("Temporal sensitivity gap:  " + str(round(canonical.mean() - shuffled.mean(), 4)))
-print("Episodes completed:        " + str(len(results_df)) + " / " + str(len(df)))
-print("Episodes failed:           " + str(errors))
-print("")
-print("By Complexity:")
-print("Complexity | Canonical | Shuffled  | Gap")
-print("-" * 45)
-for c in sorted(results_df["complexity"].unique()):
-    c_can = results_df[(results_df["condition"] == "canonical") & (results_df["complexity"] == c)]["score"]
-    c_shf = results_df[(results_df["condition"] == "shuffled_control") & (results_df["complexity"] == c)]["score"]
-    gap = c_can.mean() - c_shf.mean()
-    print(str(c).rjust(10) + " | " + str(round(c_can.mean(), 4)).rjust(9) + " | " + str(round(c_shf.mean(), 4)).rjust(9) + " | " + str(round(gap, 4)).rjust(9))
 
 
 # ============================================================
@@ -331,66 +445,93 @@ MODEL_NAME = "deepseek-ai/deepseek-r1-0528"
 import time
 
 second_llm = kbench.llms[MODEL_NAME]
-df2 = build_dataset(n_per_condition=25)
 results_m2 = []
 errors_m2 = 0
 
-for idx, row in df2.iterrows():
+for idx, row in df.iterrows():
     cond = row["condition"]
     cx = row["complexity"]
     ep = row["episode_seed"]
     tf = row["template_family"]
     for attempt in range(3):
         try:
-            score = belief_update.run(second_llm, episode_seed=ep, complexity=cx, template_family=tf, condition=cond)
-            result_val = score.result if hasattr(score, 'result') else score
-            results_m2.append({"episode_seed": ep, "complexity": cx, "condition": cond, "score": result_val})
-            print("[" + cond.rjust(16) + "] cx=" + str(cx) + " -> " + str(result_val))
+            metrics = _run_belief_episode_with_metrics(
+                llm=second_llm,
+                episode_seed=ep,
+                complexity=cx,
+                template_family=tf,
+                condition=cond,
+            )
+            results_m2.append({
+                "episode_seed": ep,
+                "complexity": cx,
+                "condition": cond,
+                "score": metrics["score"],
+                "post_total": metrics["post_total"],
+                "post_stale": metrics["post_stale"],
+            })
+            print(
+                "[" + cond.rjust(16) + "]"
+                + " cx=" + str(cx)
+                + " -> score=" + _fmt(metrics["score"])
+                + " | post_q=" + str(metrics["post_total"])
+                + " | stale=" + str(metrics["post_stale"])
+                + " | stale_rate=" + _fmt(metrics["stale_rate"])
+            )
             break
         except Exception as e:
             if attempt < 2:
                 time.sleep(5)
             else:
-                results_m2.append({"episode_seed": ep, "complexity": cx, "condition": cond, "score": None})
+                results_m2.append({
+                    "episode_seed": ep,
+                    "complexity": cx,
+                    "condition": cond,
+                    "score": None,
+                    "post_total": None,
+                    "post_stale": None,
+                })
                 errors_m2 += 1
                 print("[" + cond.rjust(16) + "] cx=" + str(cx) + " FAILED")
 
 df_m2 = pd.DataFrame(results_m2).dropna(subset=["score"])
+model2_summary = print_model_summary(
+    results_df=df_m2,
+    df_reference=df,
+    errors=errors_m2,
+    title="MODEL 2: " + MODEL_NAME,
+)
+
 can_m2 = df_m2[df_m2["condition"] == "canonical"]["score"]
 shf_m2 = df_m2[df_m2["condition"] == "shuffled_control"]["score"]
-
-print("")
-print("=" * 60)
-print("MODEL 2: " + MODEL_NAME)
-print("=" * 60)
-print("Canonical mean:            " + str(round(can_m2.mean(), 4)))
-print("Shuffled control mean:     " + str(round(shf_m2.mean(), 4)))
-print("Temporal sensitivity gap:  " + str(round(can_m2.mean() - shf_m2.mean(), 4)))
-print("Episodes completed:        " + str(len(df_m2)) + " / " + str(len(df2)))
-print("Episodes failed:           " + str(errors_m2))
-print("")
-print("By Complexity:")
-print("Complexity | Canonical | Shuffled  | Gap")
-print("-" * 45)
-for c in sorted(df_m2["complexity"].unique()):
-    c_can = df_m2[(df_m2["condition"] == "canonical") & (df_m2["complexity"] == c)]["score"]
-    c_shf = df_m2[(df_m2["condition"] == "shuffled_control") & (df_m2["complexity"] == c)]["score"]
-    gap = c_can.mean() - c_shf.mean()
-    print(str(c).rjust(10) + " | " + str(round(c_can.mean(), 4)).rjust(9) + " | " + str(round(c_shf.mean(), 4)).rjust(9) + " | " + str(round(gap, 4)).rjust(9))
 
 
 # ============================================================
 # Cell 10: Cross-Model Comparison
 # ============================================================
 
-print("=" * 60)
+print("=" * 96)
 print("CROSS-MODEL COMPARISON")
-print("=" * 60)
+print("=" * 96)
 print("")
-print("Model                     | Canonical | Shuffled | Gap")
-print("-" * 60)
-print("Gemini 2.5 Flash".ljust(26) + "| " + str(round(canonical.mean(), 4)).rjust(9) + " | " + str(round(shuffled.mean(), 4)).rjust(8) + " | " + str(round(canonical.mean() - shuffled.mean(), 4)).rjust(8))
-print(MODEL_NAME.ljust(26) + "| " + str(round(can_m2.mean(), 4)).rjust(9) + " | " + str(round(shf_m2.mean(), 4)).rjust(8) + " | " + str(round(can_m2.mean() - shf_m2.mean(), 4)).rjust(8))
+print("Model                     | Canonical (mean±std) | Shuffled (mean±std) | Gap     | StaleRate")
+print("-" * 96)
+print(
+    "Gemini 2.5 Flash".ljust(26)
+    + "| " + (_fmt(model1_summary["canonical_mean"]) + "±" + _fmt(model1_summary["canonical_std"])).rjust(21)
+    + " | " + (_fmt(model1_summary["shuffled_mean"]) + "±" + _fmt(model1_summary["shuffled_std"])).rjust(20)
+    + " | " + _fmt(model1_summary["gap"]).rjust(7)
+    + " | " + _fmt(model1_summary["stale_rate"]).rjust(9)
+)
+print(
+    MODEL_NAME.ljust(26)
+    + "| " + (_fmt(model2_summary["canonical_mean"]) + "±" + _fmt(model2_summary["canonical_std"])).rjust(21)
+    + " | " + (_fmt(model2_summary["shuffled_mean"]) + "±" + _fmt(model2_summary["shuffled_std"])).rjust(20)
+    + " | " + _fmt(model2_summary["gap"]).rjust(7)
+    + " | " + _fmt(model2_summary["stale_rate"]).rjust(9)
+)
+print("")
+print("Shared dataset rows used for both models: " + str(len(df)))
 
 
 # ============================================================
